@@ -1,0 +1,116 @@
+import DefaultButton from "@novomarkt/components/general/DefaultButton";
+import DefaultInput from "@novomarkt/components/general/DefaultInput";
+import DefaultInputEye from "@novomarkt/components/general/DefaultInputEye";
+import Text from "@novomarkt/components/general/Text";
+import { STRINGS } from "@novomarkt/locales/strings";
+import { toggleLoading } from "@novomarkt/store/slices/appSettings";
+import React, { useEffect } from "react";
+import {
+  Alert,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { useDispatch } from "react-redux";
+import useLoginHook from "./hooks";
+import { styles } from "./style";
+
+const LoginView = () => {
+  let {
+    loading,
+    onStateChange,
+    onLogin,
+    state,
+    onLoginNavigation,
+    onForgotPassNavigation,
+    error,
+    codeValue,
+  } = useLoginHook();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(toggleLoading(false));
+  }, []);
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 70 : 20}
+    >
+      <TouchableWithoutFeedback
+        onPress={() => Keyboard.dismiss()}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.container}>
+          <Text style={styles.logoText}>Novamarkt</Text>
+          <View style={styles.inputBox}>
+            <DefaultInput
+              containerStyle={styles.input}
+              inputStyle={styles.inputStyle}
+              title={STRINGS.number}
+              placeholder={STRINGS.yourNumber}
+              onChange={onStateChange("phone")}
+              value={state.phone}
+              keyboardType="phone-pad"
+              onFocus={() => {
+                if (state.phone === "") {
+                  onStateChange("phone")("+998");
+                }
+              }}
+            />
+            <DefaultInputEye
+              containerStyle={styles.input}
+              inputStyle={styles.inputStyle}
+              title={STRINGS.password}
+              placeholder={STRINGS.yourPassword}
+              textContentType={"password"}
+              secureText={false}
+              onChange={onStateChange("password")}
+              value={state.password}
+            />
+            {error ? (
+              <Text style={styles.error}>{error}</Text>
+            ) : (
+              <Text style={styles.error}></Text>
+            )}
+            <DefaultButton
+              textStyle={styles.buttonTxt}
+              text={STRINGS.auth}
+              onPress={onLogin}
+              containerStyle={styles.button}
+              loading={loading}
+            />
+            <View style={styles.rowText}>
+              <TouchableOpacity
+                onPress={onForgotPassNavigation}
+                hitSlop={{ left: 20, right: 20, bottom: 20, top: 20 }}
+              >
+                <Text style={styles.blueText}>Забыли пароль?</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onLoginNavigation}
+                hitSlop={{ left: 20, right: 20, bottom: 20, top: 20 }}
+              >
+                <Text style={styles.askText}>Нет учетной записи?</Text>
+              </TouchableOpacity>
+            </View>
+            <DefaultButton
+              textStyle={styles.buttonTxt}
+              text={STRINGS.registration}
+              onPress={onLoginNavigation}
+              containerStyle={styles.button}
+            />
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
+};
+
+export default LoginView;
